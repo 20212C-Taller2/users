@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('users:server');
 var http = require('http');
+const connectionDB = require('../model/Database');
 
 /**
  * Get port from environment and store in Express.
@@ -88,3 +89,5 @@ function onListening() {
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
 }
+
+connectionDB.connect().then(r => console.log(r)).catch(e => console.error(e));
