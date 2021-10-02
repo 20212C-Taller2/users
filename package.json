@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test": "mocha --recursive --timeout 60000",
+    "test-cv": "nyc --reporter=text --all mocha --recursive --timeout 60000",
     "start": "node ./bin/www",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
     "prettier": "prettier --write --print-width 160 '**/*.js'"
   },
   "dependencies": {

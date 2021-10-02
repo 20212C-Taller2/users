@@ -18,6 +18,27 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+let handleCorsHeaders = function (req, res, next) {
+  if (req.get("Origin") != null) {
+    res.header("Access-Control-Allow-Origin", req.get("Origin"));
+    res.header("Access-Control-Allow-Credentials", "true");
+    if (req.get("Access-Control-Request-Method")) {
+      res.header("Access-Control-Allow-Methods", req.get("Access-Control-Request-Method"));
+    }
+    if (req.get("Access-Control-Request-Headers")) {
+      res.header("Access-Control-Allow-Headers", req.get("Access-Control-Request-Headers"));
+    }
+    if (req.method === "OPTIONS") {
+      res.status(200).send();
+    } else {
+      next();
+    }
+  } else {
+    next();
+  }
+};
+
+app.use(handleCorsHeaders);
 
 app.use("/", indexRouter);
 app.route("/login").post(login.loginUser);
