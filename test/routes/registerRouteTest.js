@@ -24,7 +24,7 @@ const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const testPassword = "123456";
 
-describe("/login route", () => {
+describe("/register route", () => {
   beforeEach(async () => {
     await mockDatabase.createInMemoryDataBase();
   });
@@ -33,19 +33,67 @@ describe("/login route", () => {
     await mockDatabase.destroyInMemoryDataBase();
   });
 
-  it("should return a 404 for empty request body", (done) => {
+  it("should return a 400 for no email address", (done) => {
     chai
       .request(application)
-      .post("/login")
+      .post("/register")
       .send({})
       .end((err, res) => {
-        expect(res).to.have.status(404);
-        expect(res.body).to.have.property("message").to.be.equal("Sorry, email or password incorrect.");
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property("message").to.be.equal("Invalid email address.");
         done();
       });
   });
 
-  describe("With existent created User", (done) => {
+  it("should return a 400 for invalid email address", (done) => {
+    chai
+      .request(application)
+      .post("/register")
+      .send({ email: "invalid" })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property("message").to.be.equal("Invalid email address.");
+        done();
+      });
+  });
+
+  it("should return a 400 for empty First name", (done) => {
+    chai
+      .request(application)
+      .post("/register")
+      .send({ email: testEmail, firstName: "   " })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property("message").to.be.equal("Invalid empty First Name.");
+        done();
+      });
+  });
+
+  it("should return a 400 for empty first name", (done) => {
+    chai
+      .request(application)
+      .post("/register")
+      .send({ email: testEmail, firstName: testFirstName, lastName: "  " })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property("message").to.be.equal("Invalid empty Last Name.");
+        done();
+      });
+  });
+
+  it("should return a 400 for empty password", (done) => {
+    chai
+      .request(application)
+      .post("/register")
+      .send({ email: testEmail, firstName: testFirstName, lastName: testLastName })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property("message").to.be.equal("Password cannot be empty.");
+        done();
+      });
+  });
+
+  describe("With an already created User", (done) => {
     beforeEach(async () => {
       await mockDatabase.createInMemoryDataBase();
       const user = new User({
@@ -57,33 +105,33 @@ describe("/login route", () => {
       await user.save();
     });
 
-    it("should return 401 not authorized for invalid password", (done) => {
+    it("should return 409 trying to re register that user", (done) => {
       chai
         .request(application)
-        .post("/login")
+        .post("/register")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
           email: testEmail,
-          password: "wrongPassword",
+          password: testPassword,
         })
         .end((err, res) => {
-          expect(res).to.have.status(401);
-          expect(res.body).to.have.property("auth").to.be.equal(false);
-          expect(res.body).to.have.property("token").to.be.equal(null);
-          expect(res.body).to.have.property("message").to.be.equal("Sorry, email or password incorrect.");
+          expect(res).to.have.status(409);
+          expect(res.body)
+            .to.have.property("message")
+            .to.be.equal("Sorry, email " + testEmail + " is already registered.");
           done();
         });
     });
 
-    it("should return 200 for valid user login ", (done) => {
+    it("should return 200 for valid new user login ", (done) => {
       chai
         .request(application)
-        .post("/login")
+        .post("/register")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
-          email: testEmail,
+          email: "new@validmail.com",
           password: testPassword,
         })
         .end((err, res) => {
@@ -102,24 +150,27 @@ describe("/login route", () => {
           });
         },
       };
-      const loginWithMockedUser = proxyquire("../../routes/login", {
+      const registerWithMockedUser = proxyquire("../../routes/register", {
         "../model/schema/User": userMock,
         "../services/log/logService": mockLogger,
       });
 
       const application = proxyquire("../../app", {
-        "./routes/login": loginWithMockedUser,
+        "./routes/register": registerWithMockedUser,
       });
 
       chai
         .request(application)
-        .post("/login")
+        .post("/register")
         .send({
+          firstName: testFirstName,
+          lastName: testLastName,
           email: testEmail,
           password: testPassword,
         })
         .end((err, res) => {
           expect(res).to.have.status(500);
+          expect(res.body).to.have.property("message").to.be.equal("There was a problem registering the user.");
           done();
         });
     });
