@@ -9,6 +9,7 @@ const proxyquire = require("proxyquire");
 const bcrypt = require("bcryptjs");
 const MockLogger = require("./../mocks/MockLogger");
 const mockLogger = MockLogger.buildLogger(false);
+const constants = require("../../model/constants");
 
 const databaseWithMockLogger = proxyquire("../../model/Database", {
   "../services/log/logService": mockLogger,
@@ -141,7 +142,7 @@ describe("/register/admin route", () => {
 
           const user = await User.findOne({ email: "new@validmail.com" });
           expect(user.roles).to.have.lengthOf(1);
-          expect(user.roles[0]).to.be.equals("admin");
+          expect(user.roles[0]).to.be.equals(constants.ADMIN_ROLE);
 
           done();
         });

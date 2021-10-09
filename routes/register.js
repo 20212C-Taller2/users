@@ -4,6 +4,7 @@ const tokenService = require("../services/login/tokenService");
 const config = require("../config/config");
 const logger = require("../services/log/logService");
 const utils = require("../services/validationsUtils");
+const constants = require("../model/constants");
 
 function validateUserRegistrationRequest(req) {
   let response = {
@@ -41,7 +42,7 @@ async function registerUser(req, res) {
 }
 
 async function registerAdmin(req, res) {
-  const adminRole = ["admin"];
+  const adminRole = [constants.ADMIN_ROLE];
   return registerWithRoles(req, res, adminRole);
 }
 

@@ -9,6 +9,7 @@ const proxyquire = require("proxyquire");
 const bcrypt = require("bcryptjs");
 const MockLogger = require("./../mocks/MockLogger");
 const mockLogger = MockLogger.buildLogger(false);
+const constants = require("../../model/constants");
 
 const databaseWithMockLogger = proxyquire("../../model/Database", {
   "../services/log/logService": mockLogger,
@@ -36,7 +37,7 @@ describe("/login route", () => {
   it("should return a 404 for empty request body", (done) => {
     chai
       .request(application)
-      .post("/login")
+      .post("/login/admin")
       .send({})
       .end((err, res) => {
         expect(res).to.have.status(404);
@@ -53,6 +54,7 @@ describe("/login route", () => {
         lastName: testLastName,
         email: testEmail,
         password: bcrypt.hashSync(testPassword, 8),
+        roles: [constants.ADMIN_ROLE],
       });
       await user.save();
     });
@@ -60,7 +62,7 @@ describe("/login route", () => {
     it("should return 401 not authorized for invalid password", (done) => {
       chai
         .request(application)
-        .post("/login")
+        .post("/login/admin")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
@@ -76,10 +78,10 @@ describe("/login route", () => {
         });
     });
 
-    it("should return 200 for valid user login ", (done) => {
+    it("should return 200 for valid admin login ", (done) => {
       chai
         .request(application)
-        .post("/login")
+        .post("/login/admin")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
@@ -94,10 +96,10 @@ describe("/login route", () => {
         });
     });
 
-    it("should return 404 for valid user trying to login as admin", (done) => {
+    it("should return 404 for valid admin trying to login as user", (done) => {
       chai
         .request(application)
-        .post("/login/admin")
+        .post("/login")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
@@ -130,7 +132,7 @@ describe("/login route", () => {
 
       chai
         .request(application)
-        .post("/login")
+        .post("/login/admin")
         .send({
           email: testEmail,
           password: testPassword,
