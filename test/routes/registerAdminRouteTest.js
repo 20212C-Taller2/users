@@ -24,7 +24,7 @@ const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const testPassword = "123456";
 
-describe("/register route", () => {
+describe("/register/admin route", () => {
   beforeEach(async () => {
     await mockDatabase.createInMemoryDataBase();
   });
@@ -36,7 +36,7 @@ describe("/register route", () => {
   it("should return a 400 for no email address", (done) => {
     chai
       .request(application)
-      .post("/register")
+      .post("/register/admin")
       .send({})
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -48,7 +48,7 @@ describe("/register route", () => {
   it("should return a 400 for invalid email address", (done) => {
     chai
       .request(application)
-      .post("/register")
+      .post("/register/admin")
       .send({ email: "invalid" })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -60,7 +60,7 @@ describe("/register route", () => {
   it("should return a 400 for empty First name", (done) => {
     chai
       .request(application)
-      .post("/register")
+      .post("/register/admin")
       .send({ email: testEmail, firstName: "   " })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -72,7 +72,7 @@ describe("/register route", () => {
   it("should return a 400 for empty first name", (done) => {
     chai
       .request(application)
-      .post("/register")
+      .post("/register/admin")
       .send({ email: testEmail, firstName: testFirstName, lastName: "  " })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -84,7 +84,7 @@ describe("/register route", () => {
   it("should return a 400 for empty password", (done) => {
     chai
       .request(application)
-      .post("/register")
+      .post("/register/admin")
       .send({ email: testEmail, firstName: testFirstName, lastName: testLastName })
       .end((err, res) => {
         expect(res).to.have.status(400);
@@ -108,7 +108,7 @@ describe("/register route", () => {
     it("should return 409 trying to re register that user", (done) => {
       chai
         .request(application)
-        .post("/register")
+        .post("/register/admin")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
@@ -124,20 +124,25 @@ describe("/register route", () => {
         });
     });
 
-    it("should return 200 for valid new user registration ", (done) => {
+    it("should return 200 for valid new admin registration ", (done) => {
       chai
         .request(application)
-        .post("/register")
+        .post("/register/admin")
         .send({
           firstName: testFirstName,
           lastName: testLastName,
           email: "new@validmail.com",
           password: testPassword,
         })
-        .end((err, res) => {
+        .end(async (err, res) => {
           expect(res).to.have.status(200);
           expect(res.body).to.have.property("auth").to.be.equal(true);
           expect(res.body).to.have.property("token").to.be.not.equal(null);
+
+          const user = await User.findOne({ email: "new@validmail.com" });
+          expect(user.roles).to.have.lengthOf(1);
+          expect(user.roles[0]).to.be.equals("admin");
+
           done();
         });
     });
@@ -161,7 +166,7 @@ describe("/register route", () => {
 
       chai
         .request(application)
-        .post("/register")
+        .post("/register/admin")
         .send({
           firstName: testFirstName,
           lastName: testLastName,

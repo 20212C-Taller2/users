@@ -36,6 +36,16 @@ function validateUserRegistrationRequest(req) {
 }
 
 async function registerUser(req, res) {
+  const noRoles = [];
+  return registerWithRoles(req, res, noRoles);
+}
+
+async function registerAdmin(req, res) {
+  const adminRole = ["admin"];
+  return registerWithRoles(req, res, adminRole);
+}
+
+async function registerWithRoles(req, res, roles) {
   const validationResult = validateUserRegistrationRequest(req);
   if (!validationResult.isValid) {
     return res.status(400).send({ message: validationResult.message });
@@ -52,6 +62,9 @@ async function registerUser(req, res) {
       email: req.body.email,
       password: hashedPassword,
     });
+    if (roles.length > 0) {
+      newUser.roles = roles;
+    }
     await newUser.save();
     const token = tokenService.createExpireToken(req.body.email, config.TOKEN_EXPIRATION_TIME_IN_HS);
     return res.status(200).send({ auth: true, token: token, user: newUser });
@@ -64,4 +77,5 @@ async function registerUser(req, res) {
 
 module.exports = {
   registerUser,
+  registerAdmin,
 };
