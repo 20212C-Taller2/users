@@ -68,7 +68,15 @@ async function registerWithRoles(req, res, roles) {
     }
     await newUser.save();
     const token = tokenService.createExpireToken(req.body.email, config.TOKEN_EXPIRATION_TIME_IN_HS);
-    return res.status(200).send({ auth: true, token: token, user: newUser });
+    return res.status(200).send({
+      auth: true,
+      token: token,
+      user: {
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+      }
+    });
   } catch (error) {
     logger.error("Error registering a new User: " + req);
     logger.error(error);
