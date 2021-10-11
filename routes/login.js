@@ -20,10 +20,11 @@ async function login(req, res, userFilters) {
         auth: true,
         token: token,
         user: {
+          id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email,
-        }
+        },
       });
     }
   } catch (error) {

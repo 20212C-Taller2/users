@@ -72,10 +72,11 @@ async function registerWithRoles(req, res, roles) {
       auth: true,
       token: token,
       user: {
+        id: newUser.id,
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
-      }
+      },
     });
   } catch (error) {
     logger.error("Error registering a new User: " + req);

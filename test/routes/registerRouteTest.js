@@ -138,6 +138,10 @@ describe("/register route", () => {
           expect(res).to.have.status(200);
           expect(res.body).to.have.property("auth").to.be.equal(true);
           expect(res.body).to.have.property("token").to.be.not.equal(null);
+          expect(res.body.user).to.have.property("id").to.be.not.equal(null);
+          expect(res.body.user).to.have.property("firstName").to.be.equal(testFirstName);
+          expect(res.body.user).to.have.property("lastName").to.be.equal(testLastName);
+          expect(res.body.user).to.have.property("email").to.be.equal("new@validmail.com");
           done();
         });
     });
