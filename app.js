@@ -7,6 +7,8 @@ var logger = require("morgan");
 var indexRouter = require("./routes/index");
 const login = require("./routes/login");
 const register = require("./routes/register");
+const users = require("./routes/users");
+const middleware = require("./routes/midddleware");
 
 var app = express();
 
@@ -46,6 +48,7 @@ app.route("/login").post(login.loginUser);
 app.route("/login/admin").post(login.loginAdmin);
 app.route("/register").post(register.registerUser);
 app.route("/register/admin").post(register.registerAdmin);
+app.route("/users/:id").patch(middleware.ensureAuthenticated, users.updateUser);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
