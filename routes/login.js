@@ -14,19 +14,21 @@ async function login(req, res, userFilters) {
     const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
     if (!passwordIsValid) {
       return res.status(401).send({ auth: false, token: null, message: "Sorry, email or password incorrect." });
-    } else {
-      const token = tokenService.createExpireToken(user.email, config.TOKEN_EXPIRATION_TIME_IN_HS);
-      return res.status(200).send({
-        auth: true,
-        token: token,
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-        },
-      });
     }
+    if (user.blocked) {
+      return res.status(401).send({ auth: false, token: null, message: "The user is blocked." });
+    }
+    const token = tokenService.createExpireToken(user.email, config.TOKEN_EXPIRATION_TIME_IN_HS);
+    return res.status(200).send({
+      auth: true,
+      token: token,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
+    });
   } catch (error) {
     logger.error(error);
     return res.status(500).send({ message: "There was an error with login." });

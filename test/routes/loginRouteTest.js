@@ -146,4 +146,37 @@ describe("/login route", () => {
         });
     });
   });
+
+  describe("With a blocked user", (done) => {
+    beforeEach(async () => {
+      await mockDatabase.createInMemoryDataBase();
+      const user = new User({
+        firstName: testFirstName,
+        lastName: testLastName,
+        email: testEmail,
+        password: bcrypt.hashSync(testPassword, 8),
+        blocked : true
+      });
+      await user.save();
+    });
+
+    it("should return 401 not authorized for valid credentials", (done) => {
+      chai
+          .request(application)
+          .post("/login")
+          .send({
+            firstName: testFirstName,
+            lastName: testLastName,
+            email: testEmail,
+            password: testPassword,
+          })
+          .end((err, res) => {
+            expect(res).to.have.status(401);
+            expect(res.body).to.have.property("auth").to.be.equal(false);
+            expect(res.body).to.have.property("token").to.be.equal(null);
+            expect(res.body).to.have.property("message").to.be.equal("The user is blocked.");
+            done();
+          });
+    });
+  });
 });
