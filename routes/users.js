@@ -36,6 +36,52 @@ async function updateUser(req, res) {
   }
 }
 
+async function blockUser(req, res) {
+  const userId = req.params.id;
+  try {
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).send({ message: "Invalid user id format" });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({ message: "There is no user with id: " + userId });
+    }
+    if (user.blocked) {
+      return res.status(400).send({ message: "Cannot block an already blocked user" });
+    }
+    user.blocked = true;
+    await user.save();
+    return res.status(204).send();
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
+async function unblockUser(req, res) {
+  const userId = req.params.id;
+  try {
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).send({ message: "Invalid user id format" });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({ message: "There is no user with id: " + userId });
+    }
+    if (!user.blocked) {
+      return res.status(400).send({ message: "Cannot unblock an non blocked user" });
+    }
+    user.blocked = false;
+    await user.save();
+    return res.status(204).send();
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
 module.exports = {
   updateUser,
+  blockUser,
+  unblockUser,
 };

@@ -29,7 +29,7 @@ const testEmail = "tes@tes.com";
 const testPassword = "123456";
 const validToken = tokenService.createExpireToken(testEmail, config.TOKEN_EXPIRATION_TIME_IN_HS);
 
-describe("/tasks/:id route", () => {
+describe("/users/:id route", () => {
   beforeEach(async () => {
     await mockDatabase.createInMemoryDataBase();
   });
@@ -170,6 +170,277 @@ describe("/tasks/:id route", () => {
         })
         .end((err, res) => {
           expect(res).to.have.status(204);
+          done();
+        });
+    });
+
+    afterEach(async () => {
+      await mockDatabase.destroyInMemoryDataBase();
+    });
+  });
+});
+
+describe("/users/:id/block route", () => {
+  beforeEach(async () => {
+    await mockDatabase.createInMemoryDataBase();
+  });
+
+  afterEach(async () => {
+    await mockDatabase.destroyInMemoryDataBase();
+  });
+
+  it("should return a 403 error due to lack of request token", (done) => {
+    chai
+      .request(application)
+      .post("/users/" + userId + "/block")
+      .end((err, res) => {
+        expect(res).to.have.status(403);
+        done();
+      });
+  });
+
+  it("should return a 403 error due to lack of request token", (done) => {
+    chai
+      .request(application)
+      .delete("/users/" + userId + "/block")
+      .end((err, res) => {
+        expect(res).to.have.status(403);
+        done();
+      });
+  });
+
+  it("should return a 401 error for invalid token", (done) => {
+    chai
+      .request(application)
+      .post("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + invalidToken)
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+
+  it("should return a 401 error for invalid token", (done) => {
+    chai
+      .request(application)
+      .delete("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + invalidToken)
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+
+  it("should return a 401 error for expired token", (done) => {
+    const payload = {
+      sub: testEmail,
+      iat: moment().unix(),
+    };
+    const expiredToken = jwt.encode(payload, config.TOKEN_SECRET);
+    chai
+      .request(application)
+      .post("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + expiredToken)
+      .end((err, res) => {
+        expect(res).to.have.status(401);
+        done();
+      });
+  });
+
+  it("should return a 400 error for invalid user id format", (done) => {
+    chai
+      .request(application)
+      .post("/users/1/block")
+      .set("Authorization", "Bearer " + validToken)
+      .end((err, res) => {
+        expect(res.body).to.have.property("message").to.be.equal("Invalid user id format");
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+  it("should return a 400 error for invalid user id format", (done) => {
+    chai
+      .request(application)
+      .delete("/users/1/block")
+      .set("Authorization", "Bearer " + validToken)
+      .end((err, res) => {
+        expect(res.body).to.have.property("message").to.be.equal("Invalid user id format");
+        expect(res).to.have.status(400);
+        done();
+      });
+  });
+  it("should return a 404 error for non existent user id", (done) => {
+    chai
+      .request(application)
+      .post("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + validToken)
+      .end((err, res) => {
+        expect(res.body)
+          .to.have.property("message")
+          .to.be.equal("There is no user with id: " + userId);
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
+  it("should return a 404 error for non existent user id", (done) => {
+    chai
+      .request(application)
+      .delete("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + validToken)
+      .end((err, res) => {
+        expect(res.body)
+          .to.have.property("message")
+          .to.be.equal("There is no user with id: " + userId);
+        expect(res).to.have.status(404);
+        done();
+      });
+  });
+  it("should return 500 for internal error", (done) => {
+    const userMock = {
+      findById: async function (orderNumber) {
+        return new Promise((resolve, reject) => {
+          reject("findById: Failing on purpose");
+        });
+      },
+    };
+    const usersWithMockedUser = proxyquire("../../routes/users", {
+      "../model/schema/User": userMock,
+      "../services/log/logService": mockLogger,
+    });
+
+    const application = proxyquire("../../app", {
+      "./routes/users": usersWithMockedUser,
+    });
+
+    chai
+      .request(application)
+      .post("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + validToken)
+      .send({
+        email: testEmail,
+        password: testPassword,
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(500);
+        done();
+      });
+  });
+
+  it("should return 500 for internal error", (done) => {
+    const userMock = {
+      findById: async function (orderNumber) {
+        return new Promise((resolve, reject) => {
+          reject("findById: Failing on purpose");
+        });
+      },
+    };
+    const usersWithMockedUser = proxyquire("../../routes/users", {
+      "../model/schema/User": userMock,
+      "../services/log/logService": mockLogger,
+    });
+
+    const application = proxyquire("../../app", {
+      "./routes/users": usersWithMockedUser,
+    });
+
+    chai
+      .request(application)
+      .delete("/users/" + userId + "/block")
+      .set("Authorization", "Bearer " + validToken)
+      .send({
+        email: testEmail,
+        password: testPassword,
+      })
+      .end((err, res) => {
+        expect(res).to.have.status(500);
+        done();
+      });
+  });
+
+  describe("with a non blocked user", () => {
+    beforeEach(async () => {
+      await mockDatabase.createInMemoryDataBase();
+      const user = new User({
+        _id: userId,
+        firstName: testFirstName,
+        lastName: testLastName,
+        email: testEmail,
+        password: testPassword,
+        blocked: false,
+      });
+      await user.save();
+    });
+
+    it("should block it", (done) => {
+      const application = proxyquire("../../app", {});
+      chai
+        .request(application)
+        .post("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + validToken)
+        .end(async (err, res) => {
+          expect(res).to.have.status(204);
+          const updatedUser = await User.findById(userId);
+          expect(updatedUser.blocked).to.be.true;
+          done();
+        });
+    });
+
+    it("should fail trying to un block it", (done) => {
+      const application = proxyquire("../../app", {});
+      chai
+        .request(application)
+        .delete("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + validToken)
+        .end(async (err, res) => {
+          expect(res).to.have.status(400);
+          const updatedUser = await User.findById(userId);
+          expect(updatedUser.blocked).to.be.false;
+          done();
+        });
+    });
+
+    afterEach(async () => {
+      await mockDatabase.destroyInMemoryDataBase();
+    });
+  });
+  describe("with a blocked user", () => {
+    beforeEach(async () => {
+      await mockDatabase.createInMemoryDataBase();
+      const user = new User({
+        _id: userId,
+        firstName: testFirstName,
+        lastName: testLastName,
+        email: testEmail,
+        password: testPassword,
+        blocked: true,
+      });
+      await user.save();
+    });
+
+    it("should unblock it", (done) => {
+      const application = proxyquire("../../app", {});
+      chai
+        .request(application)
+        .delete("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + validToken)
+        .end(async (err, res) => {
+          expect(res).to.have.status(204);
+          const updatedUser = await User.findById(userId);
+          expect(updatedUser.blocked).to.be.false;
+          done();
+        });
+    });
+
+    it("should fail trying to block it again", (done) => {
+      const application = proxyquire("../../app", {});
+      chai
+        .request(application)
+        .post("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + validToken)
+        .end(async (err, res) => {
+          expect(res).to.have.status(400);
+          const updatedUser = await User.findById(userId);
+          expect(updatedUser.blocked).to.be.true;
           done();
         });
     });
