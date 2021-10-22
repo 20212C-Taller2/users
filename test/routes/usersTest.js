@@ -10,6 +10,7 @@ const tokenService = require("./../../services/login/tokenService");
 const config = require("./../../config/config");
 const MockLogger = require("./../mocks/MockLogger");
 const mockLogger = MockLogger.buildLogger(false);
+const constants = require("../../model/constants");
 
 const databaseWithMockLogger = proxyquire("../../model/Database", {
   "../services/log/logService": mockLogger,
@@ -21,13 +22,16 @@ const User = require("../../model/schema/User");
 const moment = require("moment");
 const jwt = require("jwt-simple");
 const userId = "6161dd05b63b290011ba11ba";
+const adminId = "6161dd05b63b290011ba11b2";
 
 const invalidToken = "invalid-token";
 const testFirstName = "testFirstName";
 const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
+const adminEmail = "admin@admin.com";
 const testPassword = "123456";
 const validToken = tokenService.createExpireToken(testEmail, config.TOKEN_EXPIRATION_TIME_IN_HS);
+const adminToken = tokenService.createExpireToken(adminEmail, config.TOKEN_EXPIRATION_TIME_IN_HS);
 
 describe("/users/:id route", () => {
   beforeEach(async () => {
@@ -247,206 +251,260 @@ describe("/users/:id/block route", () => {
       });
   });
 
-  it("should return a 400 error for invalid user id format", (done) => {
-    chai
-      .request(application)
-      .post("/users/1/block")
-      .set("Authorization", "Bearer " + validToken)
-      .end((err, res) => {
-        expect(res.body).to.have.property("message").to.be.equal("Invalid user id format");
-        expect(res).to.have.status(400);
-        done();
-      });
-  });
-  it("should return a 400 error for invalid user id format", (done) => {
-    chai
-      .request(application)
-      .delete("/users/1/block")
-      .set("Authorization", "Bearer " + validToken)
-      .end((err, res) => {
-        expect(res.body).to.have.property("message").to.be.equal("Invalid user id format");
-        expect(res).to.have.status(400);
-        done();
-      });
-  });
-  it("should return a 404 error for non existent user id", (done) => {
-    chai
-      .request(application)
-      .post("/users/" + userId + "/block")
-      .set("Authorization", "Bearer " + validToken)
-      .end((err, res) => {
-        expect(res.body)
-          .to.have.property("message")
-          .to.be.equal("There is no user with id: " + userId);
-        expect(res).to.have.status(404);
-        done();
-      });
-  });
-  it("should return a 404 error for non existent user id", (done) => {
-    chai
-      .request(application)
-      .delete("/users/" + userId + "/block")
-      .set("Authorization", "Bearer " + validToken)
-      .end((err, res) => {
-        expect(res.body)
-          .to.have.property("message")
-          .to.be.equal("There is no user with id: " + userId);
-        expect(res).to.have.status(404);
-        done();
-      });
-  });
-  it("should return 500 for internal error", (done) => {
-    const userMock = {
-      findById: async function (orderNumber) {
-        return new Promise((resolve, reject) => {
-          reject("findById: Failing on purpose");
-        });
-      },
-    };
-    const usersWithMockedUser = proxyquire("../../routes/users", {
-      "../model/schema/User": userMock,
-      "../services/log/logService": mockLogger,
-    });
-
-    const application = proxyquire("../../app", {
-      "./routes/users": usersWithMockedUser,
-    });
-
-    chai
-      .request(application)
-      .post("/users/" + userId + "/block")
-      .set("Authorization", "Bearer " + validToken)
-      .send({
-        email: testEmail,
-        password: testPassword,
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(500);
-        done();
-      });
-  });
-
-  it("should return 500 for internal error", (done) => {
-    const userMock = {
-      findById: async function (orderNumber) {
-        return new Promise((resolve, reject) => {
-          reject("findById: Failing on purpose");
-        });
-      },
-    };
-    const usersWithMockedUser = proxyquire("../../routes/users", {
-      "../model/schema/User": userMock,
-      "../services/log/logService": mockLogger,
-    });
-
-    const application = proxyquire("../../app", {
-      "./routes/users": usersWithMockedUser,
-    });
-
-    chai
-      .request(application)
-      .delete("/users/" + userId + "/block")
-      .set("Authorization", "Bearer " + validToken)
-      .send({
-        email: testEmail,
-        password: testPassword,
-      })
-      .end((err, res) => {
-        expect(res).to.have.status(500);
-        done();
-      });
-  });
-
-  describe("with a non blocked user", () => {
+  describe("with valid credential but not admin user", () => {
     beforeEach(async () => {
       await mockDatabase.createInMemoryDataBase();
-      const user = new User({
-        _id: userId,
+      const notAdmin = new User({
+        _id: adminId,
         firstName: testFirstName,
         lastName: testLastName,
         email: testEmail,
         password: testPassword,
         blocked: false,
       });
-      await user.save();
+      await notAdmin.save();
     });
 
-    it("should block it", (done) => {
+    afterEach(async () => {
+      await mockDatabase.destroyInMemoryDataBase();
+    });
+
+    it("should be not authorized", (done) => {
       const application = proxyquire("../../app", {});
       chai
         .request(application)
         .post("/users/" + userId + "/block")
         .set("Authorization", "Bearer " + validToken)
         .end(async (err, res) => {
-          expect(res).to.have.status(204);
-          const updatedUser = await User.findById(userId);
-          expect(updatedUser.blocked).to.be.true;
+          expect(res).to.have.status(401);
+          expect(res.body).to.have.property("message").to.be.equal("User is not allowed to perform the action.");
           done();
         });
-    });
-
-    it("should fail trying to un block it", (done) => {
-      const application = proxyquire("../../app", {});
-      chai
-        .request(application)
-        .delete("/users/" + userId + "/block")
-        .set("Authorization", "Bearer " + validToken)
-        .end(async (err, res) => {
-          expect(res).to.have.status(400);
-          const updatedUser = await User.findById(userId);
-          expect(updatedUser.blocked).to.be.false;
-          done();
-        });
-    });
-
-    afterEach(async () => {
-      await mockDatabase.destroyInMemoryDataBase();
     });
   });
-  describe("with a blocked user", () => {
+
+  describe("with admin user", () => {
     beforeEach(async () => {
       await mockDatabase.createInMemoryDataBase();
-      const user = new User({
-        _id: userId,
+      const admin = new User({
+        _id: adminId,
         firstName: testFirstName,
         lastName: testLastName,
-        email: testEmail,
+        email: adminEmail,
         password: testPassword,
-        blocked: true,
+        blocked: false,
+        roles: [constants.ADMIN_ROLE],
       });
-      await user.save();
-    });
-
-    it("should unblock it", (done) => {
-      const application = proxyquire("../../app", {});
-      chai
-        .request(application)
-        .delete("/users/" + userId + "/block")
-        .set("Authorization", "Bearer " + validToken)
-        .end(async (err, res) => {
-          expect(res).to.have.status(204);
-          const updatedUser = await User.findById(userId);
-          expect(updatedUser.blocked).to.be.false;
-          done();
-        });
-    });
-
-    it("should fail trying to block it again", (done) => {
-      const application = proxyquire("../../app", {});
-      chai
-        .request(application)
-        .post("/users/" + userId + "/block")
-        .set("Authorization", "Bearer " + validToken)
-        .end(async (err, res) => {
-          expect(res).to.have.status(400);
-          const updatedUser = await User.findById(userId);
-          expect(updatedUser.blocked).to.be.true;
-          done();
-        });
+      await admin.save();
     });
 
     afterEach(async () => {
       await mockDatabase.destroyInMemoryDataBase();
+    });
+
+    it("should return a 400 error for invalid user id format", (done) => {
+      chai
+        .request(application)
+        .post("/users/1/block")
+        .set("Authorization", "Bearer " + adminToken)
+        .end((err, res) => {
+          expect(res.body).to.have.property("message").to.be.equal("Invalid user id format");
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
+    it("should return a 400 error for invalid user id format", (done) => {
+      chai
+        .request(application)
+        .delete("/users/1/block")
+        .set("Authorization", "Bearer " + adminToken)
+        .end((err, res) => {
+          expect(res.body).to.have.property("message").to.be.equal("Invalid user id format");
+          expect(res).to.have.status(400);
+          done();
+        });
+    });
+
+    it("should return a 404 error for non existent user id", (done) => {
+      chai
+        .request(application)
+        .post("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + adminToken)
+        .end((err, res) => {
+          expect(res.body)
+            .to.have.property("message")
+            .to.be.equal("There is no user with id: " + userId);
+          expect(res).to.have.status(404);
+          done();
+        });
+    });
+    it("should return a 404 error for non existent user id", (done) => {
+      chai
+        .request(application)
+        .delete("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + adminToken)
+        .end((err, res) => {
+          expect(res.body)
+            .to.have.property("message")
+            .to.be.equal("There is no user with id: " + userId);
+          expect(res).to.have.status(404);
+          done();
+        });
+    });
+
+    it("should return 500 for internal error", (done) => {
+      const userMock = {
+        findById: async function (orderNumber) {
+          return new Promise((resolve, reject) => {
+            reject("findById: Failing on purpose");
+          });
+        },
+      };
+      const usersWithMockedUser = proxyquire("../../routes/users", {
+        "../model/schema/User": userMock,
+        "../services/log/logService": mockLogger,
+      });
+
+      const application = proxyquire("../../app", {
+        "./routes/users": usersWithMockedUser,
+      });
+
+      chai
+        .request(application)
+        .delete("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + adminToken)
+        .send({
+          email: testEmail,
+          password: testPassword,
+        })
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          done();
+        });
+    });
+
+    it("should return 500 for internal error", (done) => {
+      const userMock = {
+        findById: async function (orderNumber) {
+          return new Promise((resolve, reject) => {
+            reject("findById: Failing on purpose");
+          });
+        },
+      };
+      const usersWithMockedUser = proxyquire("../../routes/users", {
+        "../model/schema/User": userMock,
+        "../services/log/logService": mockLogger,
+      });
+
+      const application = proxyquire("../../app", {
+        "./routes/users": usersWithMockedUser,
+      });
+
+      chai
+        .request(application)
+        .post("/users/" + userId + "/block")
+        .set("Authorization", "Bearer " + adminToken)
+        .send({
+          email: testEmail,
+          password: testPassword,
+        })
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          done();
+        });
+    });
+
+    describe("with a non blocked user", () => {
+      beforeEach(async () => {
+        await mockDatabase.createInMemoryDataBase();
+        const user = new User({
+          _id: userId,
+          firstName: testFirstName,
+          lastName: testLastName,
+          email: testEmail,
+          password: testPassword,
+          blocked: false,
+        });
+        await user.save();
+      });
+
+      it("should block it", (done) => {
+        const application = proxyquire("../../app", {});
+        chai
+          .request(application)
+          .post("/users/" + userId + "/block")
+          .set("Authorization", "Bearer " + adminToken)
+          .end(async (err, res) => {
+            expect(res).to.have.status(204);
+            const updatedUser = await User.findById(userId);
+            expect(updatedUser.blocked).to.be.true;
+            done();
+          });
+      });
+
+      it("should fail trying to un block it", (done) => {
+        const application = proxyquire("../../app", {});
+        chai
+          .request(application)
+          .delete("/users/" + userId + "/block")
+          .set("Authorization", "Bearer " + adminToken)
+          .end(async (err, res) => {
+            expect(res).to.have.status(400);
+            const updatedUser = await User.findById(userId);
+            expect(updatedUser.blocked).to.be.false;
+            done();
+          });
+      });
+
+      afterEach(async () => {
+        await mockDatabase.destroyInMemoryDataBase();
+      });
+    });
+    describe("with a blocked user", () => {
+      beforeEach(async () => {
+        await mockDatabase.createInMemoryDataBase();
+        const user = new User({
+          _id: userId,
+          firstName: testFirstName,
+          lastName: testLastName,
+          email: testEmail,
+          password: testPassword,
+          blocked: true,
+        });
+        await user.save();
+      });
+
+      it("should unblock it", (done) => {
+        const application = proxyquire("../../app", {});
+        chai
+          .request(application)
+          .delete("/users/" + userId + "/block")
+          .set("Authorization", "Bearer " + adminToken)
+          .end(async (err, res) => {
+            expect(res).to.have.status(204);
+            const updatedUser = await User.findById(userId);
+            expect(updatedUser.blocked).to.be.false;
+            done();
+          });
+      });
+
+      it("should fail trying to block it again", (done) => {
+        const application = proxyquire("../../app", {});
+        chai
+          .request(application)
+          .post("/users/" + userId + "/block")
+          .set("Authorization", "Bearer " + adminToken)
+          .end(async (err, res) => {
+            expect(res).to.have.status(400);
+            const updatedUser = await User.findById(userId);
+            expect(updatedUser.blocked).to.be.true;
+            done();
+          });
+      });
+
+      afterEach(async () => {
+        await mockDatabase.destroyInMemoryDataBase();
+      });
     });
   });
 });

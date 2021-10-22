@@ -49,8 +49,8 @@ app.route("/login/admin").post(login.loginAdmin);
 app.route("/register").post(register.registerUser);
 app.route("/register/admin").post(register.registerAdmin);
 app.route("/users/:id").patch(middleware.ensureAuthenticated, users.updateUser);
-app.route("/users/:id/block").post(middleware.ensureAuthenticated, users.blockUser);
-app.route("/users/:id/block").delete(middleware.ensureAuthenticated, users.unblockUser);
+app.route("/users/:id/block").post(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.blockUser);
+app.route("/users/:id/block").delete(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.unblockUser);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
