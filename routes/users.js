@@ -23,6 +23,10 @@ async function updateUser(req, res) {
       atLeastOneChange = true;
     }
     if (req.body.email && utils.isValidMail(req.body.email)) {
+      const otherUser = await User.findOne({ email: req.body.email });
+      if (otherUser) {
+        return res.status(400).send({ message: "Email: " + req.body.email + " is already registered." });
+      }
       user.email = req.body.email;
       atLeastOneChange = true;
     }
