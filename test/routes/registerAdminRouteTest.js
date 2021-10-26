@@ -24,6 +24,7 @@ const testFirstName = "testFirstName";
 const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const testPassword = "123456";
+const testPlaceId = "ChIJgTwKgJcpQg0RaSKMYcHeNsQ";
 
 describe("/register/admin route", () => {
   beforeEach(async () => {
@@ -102,6 +103,7 @@ describe("/register/admin route", () => {
         lastName: testLastName,
         email: testEmail,
         password: bcrypt.hashSync(testPassword, 8),
+        placeId: testPlaceId,
       });
       await user.save();
     });
@@ -115,6 +117,7 @@ describe("/register/admin route", () => {
           lastName: testLastName,
           email: testEmail,
           password: testPassword,
+          placeId: testPlaceId,
         })
         .end((err, res) => {
           expect(res).to.have.status(409);
@@ -134,6 +137,7 @@ describe("/register/admin route", () => {
           lastName: testLastName,
           email: "new@validmail.com",
           password: testPassword,
+          placeId: testPlaceId,
         })
         .end(async (err, res) => {
           expect(res).to.have.status(200);
@@ -177,6 +181,7 @@ describe("/register/admin route", () => {
           lastName: testLastName,
           email: testEmail,
           password: testPassword,
+          placeId: testPlaceId,
         })
         .end((err, res) => {
           expect(res).to.have.status(500);

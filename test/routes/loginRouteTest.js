@@ -23,6 +23,7 @@ const testFirstName = "testFirstName";
 const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const testPassword = "123456";
+const testPlaceId = "ChIJgTwKgJcpQg0RaSKMYcHeNsQ";
 
 describe("/login route", () => {
   beforeEach(async () => {
@@ -53,6 +54,7 @@ describe("/login route", () => {
         lastName: testLastName,
         email: testEmail,
         password: bcrypt.hashSync(testPassword, 8),
+        placeId: testPlaceId,
       });
       await user.save();
     });
@@ -95,6 +97,7 @@ describe("/login route", () => {
           expect(res.body.user).to.have.property("firstName").to.be.equal(testFirstName);
           expect(res.body.user).to.have.property("lastName").to.be.equal(testLastName);
           expect(res.body.user).to.have.property("email").to.be.equal(testEmail);
+          expect(res.body.user).to.have.property("placeId").to.be.equal(testPlaceId);
           done();
         });
     });
@@ -156,6 +159,7 @@ describe("/login route", () => {
         email: testEmail,
         password: bcrypt.hashSync(testPassword, 8),
         blocked: true,
+        placeId: testPlaceId,
       });
       await user.save();
     });

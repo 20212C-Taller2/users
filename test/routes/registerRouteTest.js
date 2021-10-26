@@ -23,6 +23,7 @@ const testFirstName = "testFirstName";
 const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const testPassword = "123456";
+const testPlaceId = "ChIJgTwKgJcpQg0RaSKMYcHeNsQ";
 
 describe("/register route", () => {
   beforeEach(async () => {
@@ -93,6 +94,18 @@ describe("/register route", () => {
       });
   });
 
+  it("should return a 400 for empty placeId", (done) => {
+    chai
+      .request(application)
+      .post("/register")
+      .send({ email: testEmail, firstName: testFirstName, lastName: testLastName, password: testPassword })
+      .end((err, res) => {
+        expect(res).to.have.status(400);
+        expect(res.body).to.have.property("message").to.be.equal("The placeId cannot be empty.");
+        done();
+      });
+  });
+
   describe("With an already created User", (done) => {
     beforeEach(async () => {
       await mockDatabase.createInMemoryDataBase();
@@ -101,6 +114,7 @@ describe("/register route", () => {
         lastName: testLastName,
         email: testEmail,
         password: bcrypt.hashSync(testPassword, 8),
+        placeId: testPlaceId,
       });
       await user.save();
     });
@@ -114,6 +128,7 @@ describe("/register route", () => {
           lastName: testLastName,
           email: testEmail,
           password: testPassword,
+          placeId: testPlaceId,
         })
         .end((err, res) => {
           expect(res).to.have.status(409);
@@ -133,6 +148,7 @@ describe("/register route", () => {
           lastName: testLastName,
           email: "new@validmail.com",
           password: testPassword,
+          placeId: testPlaceId,
         })
         .end((err, res) => {
           expect(res).to.have.status(200);
@@ -171,6 +187,7 @@ describe("/register route", () => {
           lastName: testLastName,
           email: testEmail,
           password: testPassword,
+          placeId: testPlaceId,
         })
         .end((err, res) => {
           expect(res).to.have.status(500);

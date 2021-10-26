@@ -24,6 +24,7 @@ const testFirstName = "testFirstName";
 const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const testPassword = "123456";
+const testPlaceId = "ChIJgTwKgJcpQg0RaSKMYcHeNsQ";
 
 describe("/login route", () => {
   beforeEach(async () => {
@@ -55,6 +56,7 @@ describe("/login route", () => {
         email: testEmail,
         password: bcrypt.hashSync(testPassword, 8),
         roles: [constants.ADMIN_ROLE],
+        placeId: testPlaceId,
       });
       await user.save();
     });

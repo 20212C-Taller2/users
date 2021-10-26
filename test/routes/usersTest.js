@@ -30,6 +30,7 @@ const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
 const adminEmail = "admin@admin.com";
 const testPassword = "123456";
+const testPlaceId = "ChIJgTwKgJcpQg0RaSKMYcHeNsQ";
 const validToken = tokenService.createExpireToken(testEmail, config.TOKEN_EXPIRATION_TIME_IN_HS);
 const adminToken = tokenService.createExpireToken(adminEmail, config.TOKEN_EXPIRATION_TIME_IN_HS);
 
@@ -143,6 +144,7 @@ describe("/users/:id route", () => {
         lastName: testLastName,
         email: testEmail,
         password: testPassword,
+        placeId: testPlaceId,
       });
       await user.save();
     });
@@ -156,7 +158,7 @@ describe("/users/:id route", () => {
         .send({})
         .end((err, res) => {
           expect(res).to.have.status(400);
-          expect(res.body).to.have.property("message").to.be.equal("There is nothing to update");
+          expect(res.body).to.have.property("message").to.be.equal("There is nothing valid to update");
           done();
         });
     });
@@ -171,6 +173,7 @@ describe("/users/:id route", () => {
           email: "new@validmail.com",
           firstName: "new first name",
           lastName: "new last name",
+          placeId: "newPlaceId",
         })
         .end((err, res) => {
           expect(res).to.have.status(204);
@@ -261,6 +264,7 @@ describe("/users/:id/block route", () => {
         email: testEmail,
         password: testPassword,
         blocked: false,
+        placeId: testPlaceId,
       });
       await notAdmin.save();
     });
@@ -294,6 +298,7 @@ describe("/users/:id/block route", () => {
         password: testPassword,
         blocked: false,
         roles: [constants.ADMIN_ROLE],
+        placeId: testPlaceId,
       });
       await admin.save();
     });
@@ -424,6 +429,7 @@ describe("/users/:id/block route", () => {
           email: testEmail,
           password: testPassword,
           blocked: false,
+          placeId: testPlaceId,
         });
         await user.save();
       });
@@ -470,6 +476,7 @@ describe("/users/:id/block route", () => {
           email: testEmail,
           password: testPassword,
           blocked: true,
+          placeId: testPlaceId,
         });
         await user.save();
       });

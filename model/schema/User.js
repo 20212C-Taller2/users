@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  placeId: {
+    type: String,
+    required: true,
+  },
   roles: [
     {
       type: String,

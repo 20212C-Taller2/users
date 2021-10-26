@@ -27,6 +27,7 @@ async function login(req, res, userFilters) {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        placeId: user.placeId,
       },
     });
   } catch (error) {

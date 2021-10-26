@@ -31,6 +31,11 @@ function validateUserRegistrationRequest(req) {
     return response;
   }
 
+  if (utils.isEmpty(req.body.placeId)) {
+    response.message = "The placeId cannot be empty.";
+    return response;
+  }
+
   return {
     isValid: true,
   };
@@ -62,6 +67,7 @@ async function registerWithRoles(req, res, roles) {
       lastName: req.body.lastName,
       email: req.body.email,
       password: hashedPassword,
+      placeId: req.body.placeId,
     });
     if (roles.length > 0) {
       newUser.roles = roles;
