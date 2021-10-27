@@ -28,6 +28,7 @@ const invalidToken = "invalid-token";
 const testFirstName = "testFirstName";
 const testLastName = "testLastName";
 const testEmail = "tes@tes.com";
+const testOtherEmail = "tesOther@tes.com";
 const adminEmail = "admin@admin.com";
 const testPassword = "123456";
 const testPlaceId = "ChIJgTwKgJcpQg0RaSKMYcHeNsQ";
@@ -165,20 +166,29 @@ describe("/users/:id route", () => {
 
     it("should return 400 if there for an already registered email", (done) => {
       const application = proxyquire("../../app", {});
-      chai
-        .request(application)
-        .patch("/users/" + userId)
-        .set("Authorization", "Bearer " + validToken)
-        .send({
-          email: testEmail,
-        })
-        .end((err, res) => {
-          expect(res).to.have.status(400);
-          expect(res.body)
-            .to.have.property("message")
-            .to.be.equal("Email: " + testEmail + " is already registered.");
-          done();
-        });
+      const user = new User({
+        firstName: testFirstName,
+        lastName: testLastName,
+        email: testOtherEmail,
+        password: testPassword,
+        placeId: testPlaceId,
+      });
+      user.save().then(() => {
+        chai
+          .request(application)
+          .patch("/users/" + userId)
+          .set("Authorization", "Bearer " + validToken)
+          .send({
+            email: testOtherEmail,
+          })
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            expect(res.body)
+              .to.have.property("message")
+              .to.be.equal("Email: " + testOtherEmail + " is already registered.");
+            done();
+          });
+      });
     });
 
     it("should update the user", (done) => {
