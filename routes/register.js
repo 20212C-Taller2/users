@@ -31,11 +31,6 @@ function validateUserRegistrationRequest(req) {
     return response;
   }
 
-  if (utils.isEmpty(req.body.placeId)) {
-    response.message = "The placeId cannot be empty.";
-    return response;
-  }
-
   return {
     isValid: true,
   };
