@@ -6,4 +6,5 @@ module.exports = {
   },
   TOKEN_EXPIRATION_TIME_IN_HS: process.env.TOKEN_EXPIRATION_TIME_IN_HS || 2,
   TOKEN_SECRET: process.env.TOKEN_SECRET || "users-ultra-secret-token-value",
+  FIREBASE_SECRET: process.env.FIREBASE_SECRET || "{}",
 };

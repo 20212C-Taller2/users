@@ -46,6 +46,7 @@ app.use(handleCorsHeaders);
 app.use("/", indexRouter);
 app.route("/login").post(login.loginUser);
 app.route("/login/admin").post(login.loginAdmin);
+app.route("/login/google").post(login.loginGoogle);
 app.route("/register").post(register.registerUser);
 app.route("/register/admin").post(register.registerAdmin);
 app.route("/users/:id").patch(middleware.ensureAuthenticated, users.updateUser);

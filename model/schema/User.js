@@ -2,11 +2,9 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: true,
   },
   lastName: {
     type: String,
-    required: true,
   },
   email: {
     type: String,
@@ -14,7 +12,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
   },
   blocked: {
     type: Boolean,
@@ -22,7 +19,6 @@ const userSchema = new mongoose.Schema({
   },
   placeId: {
     type: String,
-    required: true,
   },
   roles: [
     {
@@ -31,5 +27,9 @@ const userSchema = new mongoose.Schema({
       required: false,
     },
   ],
+  googleData: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "GoogleData",
+  },
 });
 module.exports = mongoose.model("User", userSchema);
