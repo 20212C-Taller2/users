@@ -94,18 +94,6 @@ describe("/register route", () => {
       });
   });
 
-  it("should return a 400 for empty placeId", (done) => {
-    chai
-      .request(application)
-      .post("/register")
-      .send({ email: testEmail, firstName: testFirstName, lastName: testLastName, password: testPassword })
-      .end((err, res) => {
-        expect(res).to.have.status(400);
-        expect(res.body).to.have.property("message").to.be.equal("The placeId cannot be empty.");
-        done();
-      });
-  });
-
   describe("With an already created User", (done) => {
     beforeEach(async () => {
       await mockDatabase.createInMemoryDataBase();

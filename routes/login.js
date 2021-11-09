@@ -5,7 +5,6 @@ const config = require("../config/config");
 const logger = require("../services/log/logService");
 const constants = require("../model/constants");
 const admin = require("firebase-admin");
-const secret = JSON.parse(config.FIREBASE_SECRET);
 
 function createUserResponse(user, token) {
   let response = {
@@ -60,9 +59,6 @@ async function loginAdmin(req, res) {
 
 async function loginGoogle(req, res) {
   const googleToken = req.body.googleToken;
-  admin.initializeApp({
-    credential: admin.credential.cert(secret),
-  });
   admin
     .auth()
     .verifyIdToken(googleToken)

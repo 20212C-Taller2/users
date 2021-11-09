@@ -8,6 +8,8 @@ var app = require('../app');
 var debug = require('debug')('users:server');
 var http = require('http');
 const connectionDB = require('../model/Database');
+const config = require("../config/config");
+const admin = require("firebase-admin");
 
 /**
  * Get port from environment and store in Express.
@@ -91,3 +93,7 @@ function onListening() {
 }
 
 connectionDB.connect().then(r => console.log(r)).catch(e => console.error(e));
+const secret = JSON.parse(config.FIREBASE_SECRET);
+admin.initializeApp({
+  credential: admin.credential.cert(secret),
+});

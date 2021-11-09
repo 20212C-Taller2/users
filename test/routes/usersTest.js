@@ -164,7 +164,7 @@ describe("/users/:id route", () => {
         });
     });
 
-    it("should return 400 if there for an already registered email", (done) => {
+    it("should return 409 if there for an already registered email", (done) => {
       const application = proxyquire("../../app", {});
       const user = new User({
         firstName: testFirstName,
@@ -182,10 +182,10 @@ describe("/users/:id route", () => {
             email: testOtherEmail,
           })
           .end((err, res) => {
-            expect(res).to.have.status(400);
+            expect(res).to.have.status(409);
             expect(res.body)
               .to.have.property("message")
-              .to.be.equal("Email: " + testOtherEmail + " is already registered.");
+              .to.be.equal("Sorry, email " + testOtherEmail + " is already registered.");
             done();
           });
       });
