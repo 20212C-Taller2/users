@@ -1,4 +1,17 @@
 const mongoose = require("mongoose");
+
+const GoogleDataSchema = new mongoose.Schema({
+  displayName: {
+    type: String,
+  },
+  userId: {
+    type: String,
+  },
+  picture: {
+    type: String,
+  },
+});
+
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
@@ -28,8 +41,7 @@ const userSchema = new mongoose.Schema({
     },
   ],
   googleData: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "GoogleData",
+    type: GoogleDataSchema,
   },
 });
 module.exports = mongoose.model("User", userSchema);

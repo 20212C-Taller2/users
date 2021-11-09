@@ -82,9 +82,7 @@ async function loginGoogle(req, res) {
       return res.status(200).send(createUserResponse(user, token));
     })
     .catch((error) => {
-      console.log("###### ERROR IN loginGoogle ######")
-      console.log(error)
-      console.log("###################################")
+      console.error(error);
       return res.status(401).send({ auth: false, token: null, message: "Invalid user google token." });
     });
 }
