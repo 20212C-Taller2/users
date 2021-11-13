@@ -89,8 +89,47 @@ async function unblockUser(req, res) {
   }
 }
 
+function formatUser(userSchema) {
+  let user = {
+    id: userSchema._doc._id,
+    firstName: userSchema.firstName,
+    lastName: userSchema.lastName,
+    email: userSchema.email,
+    placeId: userSchema.placeId,
+  };
+  if (userSchema.googleData) {
+    user.googleData = {
+      displayName: user.googleData.displayName,
+      userId: user.googleData.userId,
+      picture: user.googleData.picture,
+    };
+  }
+  return user;
+}
+
+async function getUsers(req, res) {
+  const offset = parseInt(req.query.offset, 10) || 0;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  try {
+    let [users, userCount] = await Promise.all([
+      User.find()
+        .skip(limit * offset)
+        .limit(limit),
+      User.countDocuments(),
+    ]);
+    res.json({
+      users: users.map(formatUser),
+      total: userCount,
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
 module.exports = {
   updateUser,
   blockUser,
   unblockUser,
+  getUsers,
 };
