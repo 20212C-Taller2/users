@@ -67,9 +67,12 @@ async function registerWithRoles(req, res, roles) {
     if (roles.length > 0) {
       newUser.roles = roles;
     }
+    if (req.body.interests && Array.isArray(req.body.interests)) {
+      newUser.interests = req.body.interests;
+    }
     await newUser.save();
     const token = tokenService.createExpireToken(req.body.email, config.TOKEN_EXPIRATION_TIME_IN_HS);
-    return res.status(200).send({
+    let response = {
       auth: true,
       token: token,
       user: {
@@ -77,8 +80,13 @@ async function registerWithRoles(req, res, roles) {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
+        interests: [],
       },
-    });
+    };
+    if (newUser.interests) {
+      response.user.interests = newUser.interests;
+    }
+    return res.status(200).send(response);
   } catch (error) {
     logger.error("Error registering a new User: " + req);
     logger.error(error);

@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
   placeId: {
     type: String,
   },
+  interests: {
+    type: [String],
+    default: [],
+  },
   roles: [
     {
       type: String,

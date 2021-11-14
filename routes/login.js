@@ -16,6 +16,7 @@ function createUserResponse(user, token) {
       lastName: user.lastName,
       email: user.email,
       placeId: user.placeId,
+      interests: user.interests,
     },
   };
   if (user.googleData) {

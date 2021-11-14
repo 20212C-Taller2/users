@@ -34,6 +34,10 @@ async function updateUser(req, res) {
       user.placeId = req.body.placeId;
       atLeastOneChange = true;
     }
+    if (req.body.interests && Array.isArray(req.body.interests)) {
+      user.interests = req.body.interests;
+      atLeastOneChange = true;
+    }
     if (!atLeastOneChange) {
       return res.status(400).send({ message: "There is nothing valid to update" });
     }
@@ -96,6 +100,7 @@ function formatUser(userSchema) {
     lastName: userSchema.lastName,
     email: userSchema.email,
     placeId: userSchema.placeId,
+    interests: userSchema.interests,
   };
   if (userSchema.googleData) {
     user.googleData = {
