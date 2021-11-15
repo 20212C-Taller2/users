@@ -2,6 +2,7 @@ const User = require("../model/schema/User");
 const logger = require("../services/log/logService");
 const mongoose = require("mongoose");
 const utils = require("../services/validationsUtils");
+const constants = require("../model/constants");
 
 async function updateUser(req, res) {
   const userId = req.params.id;
@@ -132,9 +133,25 @@ async function getUsers(req, res) {
   }
 }
 
+async function isBlockedUser(req, res) {
+  try {
+    const user = await User.findOne({ email: res.locals.subject });
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+    return res.status(200).send({
+      blocked: user.blocked,
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
 module.exports = {
   updateUser,
   blockUser,
   unblockUser,
   getUsers,
+  isBlockedUser,
 };

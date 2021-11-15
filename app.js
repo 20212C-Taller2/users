@@ -50,6 +50,7 @@ app.route("/login/google").post(login.loginGoogle);
 app.route("/register").post(register.registerUser);
 app.route("/register/admin").post(register.registerAdmin);
 app.route("/users").get(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.getUsers);
+app.route("/users/blocked").get(middleware.ensureAuthenticated, users.isBlockedUser);
 app.route("/users/:id").patch(middleware.ensureAuthenticated, users.updateUser);
 app.route("/users/:id/block").post(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.blockUser);
 app.route("/users/:id/block").delete(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.unblockUser);
