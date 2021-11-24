@@ -50,6 +50,23 @@ async function updateUser(req, res) {
   }
 }
 
+async function getUser(req, res) {
+  const userId = req.params.id;
+  try {
+    if (!mongoose.isValidObjectId(userId)) {
+      return res.status(400).send({ message: "Invalid user id format" });
+    }
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({ message: "There is no user with id: " + userId });
+    }
+    res.json(formatUser(user));
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
 async function blockUser(req, res) {
   const userId = req.params.id;
   try {
@@ -153,5 +170,6 @@ module.exports = {
   blockUser,
   unblockUser,
   getUsers,
+  getUser,
   isBlockedUser,
 };
