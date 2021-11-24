@@ -122,9 +122,9 @@ function formatUser(userSchema) {
   };
   if (userSchema.googleData) {
     user.googleData = {
-      displayName: user.googleData.displayName,
-      userId: user.googleData.userId,
-      picture: user.googleData.picture,
+      displayName: userSchema.googleData.displayName,
+      userId: userSchema.googleData.userId,
+      picture: userSchema.googleData.picture,
     };
   }
   return user;
