@@ -119,6 +119,7 @@ function formatUser(userSchema) {
     email: userSchema.email,
     placeId: userSchema.placeId,
     interests: userSchema.interests,
+    blocked: userSchema.blocked,
   };
   if (userSchema.googleData) {
     user.googleData = {
