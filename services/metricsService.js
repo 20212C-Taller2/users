@@ -21,12 +21,17 @@ module.exports = {
       service: "users",
       operation: operation,
     };
+    logger.log(`Sending message to "${queue}" queue: `, JSON.stringify(message));
     const sent = await channel.sendToQueue(queue, Buffer.from(JSON.stringify(message)), {
       persistent: true,
     });
     if (!sent) {
       logger.error(`Fails sending message to "${queue}" queue`, message);
     }
+    setTimeout(() => {
+      channel.close();
+      connection.close();
+    }, 500);
   },
   USER_LOGIN_METRIC,
   USER_FEDERATED_LOGIN_METRIC,

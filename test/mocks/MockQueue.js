@@ -12,8 +12,10 @@ module.exports = {
             messages.push(content);
             return true;
           },
+          close() {},
         };
       },
+      close() {},
     };
   },
   hasMessage: function (operation) {
