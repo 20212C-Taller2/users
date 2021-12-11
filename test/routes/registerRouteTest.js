@@ -4,7 +4,6 @@ const expect = require("chai").expect;
 chai.use(chaiHttp);
 const assertArrays = require("chai-arrays");
 chai.use(assertArrays);
-const application = require("../../app");
 const proxyquire = require("proxyquire");
 const bcrypt = require("bcryptjs");
 const MockLogger = require("./../mocks/MockLogger");
@@ -18,6 +17,19 @@ const mockDatabase = proxyquire("../model/databaseTestHelper", {
 });
 
 const User = require("../../model/schema/User");
+const MockQueue = require("./../mocks/MockQueue");
+
+const serviceMetricsWithMockQueue = proxyquire("../../services/metricsService", {
+  amqplib: MockQueue,
+});
+
+const registerWithMockedMetricsService = proxyquire("../../routes/register", {
+  "../services/metricsService": serviceMetricsWithMockQueue,
+});
+
+const application = proxyquire("../../app", {
+  "./routes/register": registerWithMockedMetricsService,
+});
 
 const testFirstName = "testFirstName";
 const testLastName = "testLastName";
@@ -146,6 +158,7 @@ describe("/register route", () => {
           expect(res.body.user).to.have.property("firstName").to.be.equal(testFirstName);
           expect(res.body.user).to.have.property("lastName").to.be.equal(testLastName);
           expect(res.body.user).to.have.property("email").to.be.equal("new@validmail.com");
+          expect(MockQueue.hasMessage(serviceMetricsWithMockQueue.USER_REGISTER_METRIC)).not.to.be.undefined;
           done();
         });
     });

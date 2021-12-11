@@ -2,7 +2,7 @@ const User = require("../model/schema/User");
 const logger = require("../services/log/logService");
 const mongoose = require("mongoose");
 const utils = require("../services/validationsUtils");
-const constants = require("../model/constants");
+const metricsService = require("../services/metricsService");
 
 async function updateUser(req, res) {
   const userId = req.params.id;
@@ -82,6 +82,7 @@ async function blockUser(req, res) {
     }
     user.blocked = true;
     await user.save();
+    await metricsService.publishMetric(metricsService.USER_BLOCKED_METRIC);
     return res.status(204).send();
   } catch (error) {
     logger.error(error);
@@ -104,6 +105,7 @@ async function unblockUser(req, res) {
     }
     user.blocked = false;
     await user.save();
+    await metricsService.publishMetric(metricsService.USER_UNBLOCKED_METRIC);
     return res.status(204).send();
   } catch (error) {
     logger.error(error);

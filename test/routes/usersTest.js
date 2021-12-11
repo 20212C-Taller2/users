@@ -4,13 +4,13 @@ const expect = require("chai").expect;
 chai.use(chaiHttp);
 const assertArrays = require("chai-arrays");
 chai.use(assertArrays);
-const application = require("../../app");
 const proxyquire = require("proxyquire");
 const tokenService = require("./../../services/login/tokenService");
 const config = require("./../../config/config");
 const MockLogger = require("./../mocks/MockLogger");
 const mockLogger = MockLogger.buildLogger(false);
 const constants = require("../../model/constants");
+const MockQueue = require("./../mocks/MockQueue");
 
 const databaseWithMockLogger = proxyquire("../../model/Database", {
   "../services/log/logService": mockLogger,
@@ -18,6 +18,19 @@ const databaseWithMockLogger = proxyquire("../../model/Database", {
 const mockDatabase = proxyquire("../model/databaseTestHelper", {
   "./../../model/Database": databaseWithMockLogger,
 });
+
+const serviceMetricsWithMockQueue = proxyquire("../../services/metricsService", {
+  amqplib: MockQueue,
+});
+
+const userWithMockedMetricsService = proxyquire("../../routes/users", {
+  "../services/metricsService": serviceMetricsWithMockQueue,
+});
+
+const application = proxyquire("../../app", {
+  "./routes/users": userWithMockedMetricsService,
+});
+
 const User = require("../../model/schema/User");
 const moment = require("moment");
 const jwt = require("jwt-simple");
@@ -463,7 +476,6 @@ describe("/users/:id/block route", () => {
       });
 
       it("should block it", (done) => {
-        const application = proxyquire("../../app", {});
         chai
           .request(application)
           .post("/users/" + userId + "/block")
@@ -472,6 +484,7 @@ describe("/users/:id/block route", () => {
             expect(res).to.have.status(204);
             const updatedUser = await User.findById(userId);
             expect(updatedUser.blocked).to.be.true;
+            expect(MockQueue.hasMessage(serviceMetricsWithMockQueue.USER_BLOCKED_METRIC)).not.to.be.undefined;
             done();
           });
       });
@@ -510,7 +523,6 @@ describe("/users/:id/block route", () => {
       });
 
       it("should unblock it", (done) => {
-        const application = proxyquire("../../app", {});
         chai
           .request(application)
           .delete("/users/" + userId + "/block")
@@ -519,6 +531,7 @@ describe("/users/:id/block route", () => {
             expect(res).to.have.status(204);
             const updatedUser = await User.findById(userId);
             expect(updatedUser.blocked).to.be.false;
+            expect(MockQueue.hasMessage(serviceMetricsWithMockQueue.USER_UNBLOCKED_METRIC)).not.to.be.undefined;
             done();
           });
       });

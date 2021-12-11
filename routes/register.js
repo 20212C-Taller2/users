@@ -5,6 +5,7 @@ const config = require("../config/config");
 const logger = require("../services/log/logService");
 const utils = require("../services/validationsUtils");
 const constants = require("../model/constants");
+const metricsService = require("../services/metricsService");
 
 function validateUserRegistrationRequest(req) {
   let response = {
@@ -46,6 +47,10 @@ async function registerAdmin(req, res) {
   return registerWithRoles(req, res, adminRole);
 }
 
+function isUserRole(roles) {
+  return roles.length === 0;
+}
+
 async function registerWithRoles(req, res, roles) {
   const validationResult = validateUserRegistrationRequest(req);
   if (!validationResult.isValid) {
@@ -85,6 +90,9 @@ async function registerWithRoles(req, res, roles) {
     };
     if (newUser.interests) {
       response.user.interests = newUser.interests;
+    }
+    if (isUserRole(roles)) {
+      await metricsService.publishMetric(metricsService.USER_REGISTER_METRIC);
     }
     return res.status(200).send(response);
   } catch (error) {
