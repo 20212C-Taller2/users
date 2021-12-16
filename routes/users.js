@@ -3,6 +3,7 @@ const logger = require("../services/log/logService");
 const mongoose = require("mongoose");
 const utils = require("../services/validationsUtils");
 const metricsService = require("../services/metricsService");
+const constants = require("../model/constants");
 
 async function updateUser(req, res) {
   const userId = req.params.id;
@@ -136,9 +137,13 @@ function formatUser(userSchema) {
 async function getUsers(req, res) {
   const offset = parseInt(req.query.offset, 10) || 0;
   const limit = parseInt(req.query.limit, 10) || 10;
+  let userQueryFilter = {}
+  if (req.query.appUsers) {
+    userQueryFilter = { $ne: constants.ADMIN_ROLE }
+  }
   try {
     let [users, userCount] = await Promise.all([
-      User.find()
+      User.find(userQueryFilter)
         .skip(limit * offset)
         .limit(limit),
       User.countDocuments(),
