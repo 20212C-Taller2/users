@@ -146,7 +146,7 @@ async function getUsers(req, res) {
       User.find(userQueryFilter)
         .skip(limit * offset)
         .limit(limit),
-      User.countDocuments(),
+      User.countDocuments(userQueryFilter),
     ]);
     res.json({
       users: users.map(formatUser),
