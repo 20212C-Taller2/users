@@ -6,6 +6,7 @@ const logger = require("../services/log/logService");
 const utils = require("../services/validationsUtils");
 const constants = require("../model/constants");
 const metricsService = require("../services/metricsService");
+const subscriptionService = require("../services/subscriptionService");
 
 function validateUserRegistrationRequest(req) {
   let response = {
@@ -92,7 +93,7 @@ async function registerWithRoles(req, res, roles) {
       response.user.interests = newUser.interests;
     }
     if (isUserRole(roles)) {
-      await metricsService.publishMetric(metricsService.USER_REGISTER_METRIC);
+      await Promise.all([subscriptionService.createSubscriber(newUser.id), metricsService.publishMetric(metricsService.USER_REGISTER_METRIC)]);
     }
     return res.status(200).send(response);
   } catch (error) {

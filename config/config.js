@@ -9,4 +9,5 @@ module.exports = {
   FIREBASE_SECRET: process.env.FIREBASE_SECRET || "{}",
   METRICS_QUEUE: process.env.QUEUE || "service-metrics",
   CLOUDAMQP_URL: process.env.CLOUDAMQP_URL || "amqps://localhost",
+  SUBSCRIPTION_SERVICE_URL: process.env.SUBSCRIPTION_SERVICE_URL || "https://ubademy-subscriptions-api.herokuapp.com",
 };

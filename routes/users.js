@@ -137,9 +137,9 @@ function formatUser(userSchema) {
 async function getUsers(req, res) {
   const offset = parseInt(req.query.offset, 10) || 0;
   const limit = parseInt(req.query.limit, 10) || 10;
-  let userQueryFilter = {}
+  let userQueryFilter = {};
   if (req.query.appUsers) {
-    userQueryFilter.roles = { $ne: constants.ADMIN_ROLE }
+    userQueryFilter.roles = { $ne: constants.ADMIN_ROLE };
   }
   try {
     let [users, userCount] = await Promise.all([

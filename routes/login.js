@@ -6,6 +6,7 @@ const logger = require("../services/log/logService");
 const constants = require("../model/constants");
 const admin = require("firebase-admin");
 const metricsService = require("../services/metricsService");
+const subscriptionService = require("../services/subscriptionService");
 
 function createUserResponse(user, token) {
   let response = {
@@ -79,7 +80,7 @@ async function loginGoogle(req, res) {
           },
         });
         await user.save();
-        await metricsService.publishMetric(metricsService.USER_FEDERATED_REGISTER_METRIC);
+        await Promise.all([subscriptionService.createSubscriber(user.id), metricsService.publishMetric(metricsService.USER_FEDERATED_REGISTER_METRIC)]);
       }
       if (user.blocked) {
         return res.status(401).send({ auth: false, token: null, message: "The user is blocked." });
