@@ -16,6 +16,10 @@ module.exports = {
       name: "user",
       description: "The following endpoints provides support for end user application frontend",
     },
+    {
+      name: "admin",
+      description: "The following endpoints provides support for backoffice application",
+    },
   ],
   paths: {
     "/login": {
@@ -23,7 +27,6 @@ module.exports = {
         tags: ["user"],
         summary: "User login",
         description: "Allows user to enter app",
-        operationId: "postLogin",
         requestBody: {
           content: {
             "application/json": {
@@ -78,6 +81,233 @@ module.exports = {
         },
       },
     },
+    "/login/admin": {
+      post: {
+        tags: ["admin"],
+        summary: "Admin login",
+        description: "Allows admin to enter backoffice app",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestLogin",
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          200: {
+            description: "OK login",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ResponseLogin",
+                },
+              },
+            },
+          },
+          404: {
+            description: "User not found",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorWrongPassword",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Not authorized for invalid password",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorWrongPassword",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/login/google": {
+      post: {
+        tags: ["user"],
+        summary: "Admin login",
+        description: "Allows admin to enter backoffice app",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestGoogleLogin",
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          200: {
+            description: "OK login",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ResponseLogin",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Not authorized for invalid password",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorWrongPassword",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/register": {
+      post: {
+        tags: ["user"],
+        summary: "User registration",
+        description: "Allows user to be registered",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestRegister",
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          200: {
+            description: "OK register",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ResponseLogin",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Bad request",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/BadRequest",
+                },
+              },
+            },
+          },
+          409: {
+            description: "User already registered",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Conflict",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/register/admin": {
+      post: {
+        tags: ["admin"],
+        summary: "Admin registration",
+        description: "Allows admin to be registered",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestRegister",
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          200: {
+            description: "OK register",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ResponseLogin",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Bad request",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/BadRequest",
+                },
+              },
+            },
+          },
+          409: {
+            description: "User already registered",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Conflict",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+
   },
   components: {
     schemas: {
@@ -97,6 +327,54 @@ module.exports = {
             example: "Passw0rd1234",
             minlength: 8,
             required: true,
+          },
+        },
+      },
+      RequestGoogleLogin: {
+        type: "object",
+        properties: {
+          googleToken: {
+            type: "string",
+            description: "The google token",
+            example: "asjdhflasgug45jth5n6lj6h6l65nk4l433",
+            required: true,
+          },
+        },
+      },
+      RequestRegister: {
+        type: "object",
+        properties: {
+          password: {
+            type: "string",
+            description: "Your password",
+            example: "Passw0rd1234",
+            minlength: 8,
+            required: true,
+          },
+          firstName: {
+            type: "string",
+            example: "Pablo",
+            required: true,
+          },
+          lastName: {
+            type: "string",
+            example: "Massuh",
+            required: true,
+          },
+          email: {
+            type: "string",
+            example: "pablomassuh@hotmail.com",
+            required: true,
+          },
+          placeId: {
+            type: "string",
+            description: "It's the id of the user's city",
+            example: "ChIJWcbC2mUso5URjTfoNV12W7k",
+          },
+          interests: {
+            type: "array",
+            description: "It's an array of string of the user's interests",
+            example: "['COOKING', 'YOGA']",
           },
         },
       },
@@ -190,6 +468,26 @@ module.exports = {
             type: "string",
             description: "the cause of the error",
             example: "There was an error with login.",
+          },
+        },
+      },
+      BadRequest: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            description: "the invalid field",
+            example: "Password cannot be empty.",
+          },
+        },
+      },
+      Conflict: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            description: "The reason of the conflict",
+            example: " Sorry, email example@gmail.com is already registered.",
           },
         },
       },
