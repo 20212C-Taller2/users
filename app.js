@@ -66,7 +66,6 @@ app.route("/users/:id/block").post(middleware.ensureAuthenticated, middleware.en
 app.route("/users/:id/block").delete(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.unblockUser);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 
-
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));

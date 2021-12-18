@@ -1,5 +1,5 @@
 module.exports = {
-  swagger: "2.0",
+  openapi: "3.0.2",
   info: {
     version: "1.0.0",
     title: "Users API",
@@ -24,37 +24,55 @@ module.exports = {
         summary: "User login",
         description: "Allows user to enter app",
         operationId: "postLogin",
-        parameters: [{
-          in: "body",
-          name: "body",
-          schema: {
-            $ref: "#/components/schemas/RequestLogin",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestLogin",
+              },
+            },
           },
           required: true,
-        }],
+        },
         responses: {
           200: {
             description: "OK login",
-            schema: {
-              $ref: "#/components/schemas/ResponseLogin",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ResponseLogin",
+                },
+              },
             },
           },
           404: {
             description: "User not found",
-            schema: {
-              $ref: "#/components/schemas/ErrorWrongPassword",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorWrongPassword",
+                },
+              },
             },
           },
           401: {
             description: "Not authorized for invalid password",
-            schema: {
-              $ref: "#/components/schemas/ErrorWrongPassword",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorWrongPassword",
+                },
+              },
             },
           },
           500: {
             description: "Error: Internal Server Error",
-            schema: {
-              $ref: "#/components/schemas/Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
             },
           },
         },
@@ -90,36 +108,37 @@ module.exports = {
           },
           token: {
             type: "string",
-            example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwYWJsb21hc3N1aEBnbWFpbC5jb20iLCJpYXQiOjE2Mzk2ODA5NTYsImV4cCI6MTYzOTY4ODE1Nn0.zXrdT2CZ6qqCDGpusNogwwWrwvZBWjlnUJ6tCl_vAZU",
+            example:
+              "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJwYWJsb21hc3N1aEBnbWFpbC5jb20iLCJpYXQiOjE2Mzk2ODA5NTYsImV4cCI6MTYzOTY4ODE1Nn0.zXrdT2CZ6qqCDGpusNogwwWrwvZBWjlnUJ6tCl_vAZU",
           },
           user: {
             type: "object",
             properties: {
               id: {
                 type: "string",
-                example: "6161da733dbb2500114bc6cf"
+                example: "6161da733dbb2500114bc6cf",
               },
               firstName: {
                 type: "string",
-                example: "Pablo"
+                example: "Pablo",
               },
               lastName: {
                 type: "string",
-                example: "Massuh"
+                example: "Massuh",
               },
               email: {
                 type: "string",
-                example: "pablomassuh@hotmail.com"
+                example: "pablomassuh@hotmail.com",
               },
               placeId: {
                 type: "string",
                 description: "It's the id of the user's city",
-                example: "ChIJWcbC2mUso5URjTfoNV12W7k"
+                example: "ChIJWcbC2mUso5URjTfoNV12W7k",
               },
               interests: {
                 type: "array",
                 description: "It's an array of string of the user's interests",
-                example: "['COOKING', 'YOGA']"
+                example: "['COOKING', 'YOGA']",
               },
               googleData: {
                 type: "object",
@@ -130,17 +149,17 @@ module.exports = {
                   },
                   userId: {
                     type: "string",
-                    example: "pZ5ImYPG57TsR4ZqqpBuiuYJFy06"
+                    example: "pZ5ImYPG57TsR4ZqqpBuiuYJFy06",
                   },
                   picture: {
                     type: "string",
                     description: "URL with the user picture",
-                    example: "https://lh3.googleusercontent.com/a-/AOh14Gip9foTlZxrU9AEz4VH14M8VjL-fYbu_EX3J9lgvjI=s96-c"
-                  }
-                }
-              }
+                    example: "https://lh3.googleusercontent.com/a-/AOh14Gip9foTlZxrU9AEz4VH14M8VjL-fYbu_EX3J9lgvjI=s96-c",
+                  },
+                },
+              },
             },
-          }
+          },
         },
       },
       //Response: 400,500..
