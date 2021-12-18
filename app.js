@@ -9,6 +9,14 @@ const login = require("./routes/login");
 const register = require("./routes/register");
 const users = require("./routes/users");
 const middleware = require("./routes/midddleware");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./config/swagger.js");
+const swaggerOptions = {
+  explorer: false,
+  swaggerOptions: {
+    validatorUrl: null,
+  },
+};
 
 var app = express();
 
@@ -56,6 +64,8 @@ app.route("/users/:id").patch(middleware.ensureAuthenticated, users.updateUser);
 app.route("/users/:id").get(middleware.ensureAuthenticated, users.getUser);
 app.route("/users/:id/block").post(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.blockUser);
 app.route("/users/:id/block").delete(middleware.ensureAuthenticated, middleware.ensureAdminRole, users.unblockUser);
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
