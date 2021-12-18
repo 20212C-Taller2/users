@@ -134,6 +134,17 @@ function formatUser(userSchema) {
   return user;
 }
 
+async function getUsersByIds(req, res) {
+  const ids = req.body;
+  try {
+    const users = await User.find({ _id: { $in: ids } });
+    res.json(users.map(formatUser));
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
 async function getUsers(req, res) {
   const offset = parseInt(req.query.offset, 10) || 0;
   const limit = parseInt(req.query.limit, 10) || 10;
@@ -180,4 +191,5 @@ module.exports = {
   getUsers,
   getUser,
   isBlockedUser,
+  getUsersByIds,
 };
