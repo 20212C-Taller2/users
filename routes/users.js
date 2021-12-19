@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const utils = require("../services/validationsUtils");
 const metricsService = require("../services/metricsService");
 const constants = require("../model/constants");
+const admin = require("firebase-admin");
 
 async function updateUser(req, res) {
   const userId = req.params.id;
@@ -188,6 +189,34 @@ async function isBlockedUser(req, res) {
   }
 }
 
+async function notifyUser(req, res) {
+  const userIdFrom = req.body.from;
+  const userIdTo = req.body.to;
+  if (!mongoose.isValidObjectId(userIdFrom) || !mongoose.isValidObjectId(userIdTo)) {
+    return res.status(400).send({ message: "Invalid user id format" });
+  }
+  try {
+    const users = await User.find({ _id: { $in: [userIdFrom, userIdTo] } });
+    const userFrom = users.find((user) => user._doc._id === userIdFrom).map(formatUser);
+    const userTo = users.find((user) => user._doc._id === userIdTo);
+    const message = {
+      token: userTo.fcmtoken,
+      notification: {
+        title: "New Message",
+        body: "There is a new message for you",
+      },
+      data: userFrom,
+    };
+    logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
+    logger.log(JSON.stringify(message));
+    await admin.messaging().send(message);
+    return res.status(204).send();
+  } catch (error) {
+    logger.error(error);
+    res.status(500).send({ message: error.message });
+  }
+}
+
 module.exports = {
   updateUser,
   blockUser,
@@ -196,4 +225,5 @@ module.exports = {
   getUser,
   isBlockedUser,
   getUsersByIds,
+  notifyUser,
 };
