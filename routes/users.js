@@ -211,7 +211,7 @@ async function notifyUser(req, res) {
             title: "New Message from " + userFrom.name(),
             body: req.body.message,
           },
-          data: formatUser(userFrom),
+          data: JSON.stringify(formatUser(userFrom)),
         };
         logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
         logger.log(JSON.stringify(message));
