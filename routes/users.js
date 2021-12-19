@@ -213,6 +213,7 @@ async function notifyUser(req, res) {
           },
           data: {
             userFrom: JSON.stringify(formatUser(userFrom)),
+            userTo: JSON.stringify(formatUser(userTo)),
           },
         };
         logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
