@@ -200,20 +200,24 @@ async function notifyUser(req, res) {
   }
   try {
     const users = await User.find({ _id: { $in: [userIdFrom, userIdTo] } });
-    const userFrom = users.find((user) => user._doc._id === userIdFrom);
-    const userTo = users.find((user) => user._doc._id === userIdTo);
-    const message = {
-      token: userTo.fcmtoken,
-      notification: {
-        title: "New Message from " + userFrom.name(),
-        body: req.body.message,
-      },
-      data: formatUser(userFrom),
-    };
-    logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
-    logger.log(JSON.stringify(message));
-    await admin.messaging().send(message);
-    return res.status(204).send();
+    const userFrom = users.find((user) => user._id === userIdFrom);
+    const userTo = users.find((user) => user._id === userIdTo);
+    if (userFrom && userTo) {
+      const message = {
+        token: userTo.fcmtoken,
+        notification: {
+          title: "New Message from " + userFrom.name(),
+          body: req.body.message,
+        },
+        data: formatUser(userFrom),
+      };
+      logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
+      logger.log(JSON.stringify(message));
+      await admin.messaging().send(message);
+      return res.status(204).send();
+    } else {
+      return res.status(404).send({ message: "User not found" });
+    }
   } catch (error) {
     logger.error(error);
     res.status(500).send({ message: error.message });
