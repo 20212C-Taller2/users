@@ -44,6 +44,9 @@ const userSchema = new mongoose.Schema({
       required: false,
     },
   ],
+  fcmtoken: {
+    type: String,
+  },
   googleData: {
     type: GoogleDataSchema,
   },

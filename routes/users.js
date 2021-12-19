@@ -40,6 +40,10 @@ async function updateUser(req, res) {
       user.interests = req.body.interests;
       atLeastOneChange = true;
     }
+    if (req.body.fcmtoken && !utils.isEmpty(req.body.fcmtoken)) {
+      user.fcmtoken = req.body.fcmtoken;
+      atLeastOneChange = true;
+    }
     if (!atLeastOneChange) {
       return res.status(400).send({ message: "There is nothing valid to update" });
     }
