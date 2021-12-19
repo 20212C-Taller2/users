@@ -200,8 +200,8 @@ async function notifyUser(req, res) {
   }
   try {
     const users = await User.find({ _id: { $in: [userIdFrom, userIdTo] } });
-    const userFrom = users.find((user) => user._id === userIdFrom);
-    const userTo = users.find((user) => user._id === userIdTo);
+    const userFrom = users.find((user) => user.id === userIdFrom);
+    const userTo = users.find((user) => user.id === userIdTo);
     if (userFrom && userTo) {
       const message = {
         token: userTo.fcmtoken,
