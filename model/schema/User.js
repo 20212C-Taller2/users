@@ -12,7 +12,7 @@ const GoogleDataSchema = new mongoose.Schema({
   },
 });
 
-const userSchema = new mongoose.Schema({
+let userSchema = new mongoose.Schema({
   firstName: {
     type: String,
   },
@@ -51,4 +51,12 @@ const userSchema = new mongoose.Schema({
     type: GoogleDataSchema,
   },
 });
+
+userSchema.methods.name = function () {
+  if (this.googleData) {
+    return this.googleData.displayName;
+  }
+  return this.firstName + " " + this.lastName;
+};
+
 module.exports = mongoose.model("User", userSchema);
