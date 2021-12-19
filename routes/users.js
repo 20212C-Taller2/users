@@ -203,18 +203,22 @@ async function notifyUser(req, res) {
     const userFrom = users.find((user) => user.id === userIdFrom);
     const userTo = users.find((user) => user.id === userIdTo);
     if (userFrom && userTo) {
-      const message = {
-        token: userTo.fcmtoken,
-        notification: {
-          title: "New Message from " + userFrom.name(),
-          body: req.body.message,
-        },
-        data: formatUser(userFrom),
-      };
-      logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
-      logger.log(JSON.stringify(message));
-      await admin.messaging().send(message);
-      return res.status(204).send();
+      let messageSent = false;
+      if (userTo.fcmtoken) {
+        const message = {
+          token: userTo.fcmtoken,
+          notification: {
+            title: "New Message from " + userFrom.name(),
+            body: req.body.message,
+          },
+          data: formatUser(userFrom),
+        };
+        logger.log("BEFORE SENDING PUSH NOTIFICATION WITH MESSAGE: ");
+        logger.log(JSON.stringify(message));
+        await admin.messaging().send(message);
+        messageSent = true;
+      }
+      return res.status(200).send({ messageSent: messageSent });
     } else {
       return res.status(404).send({ message: "User not found" });
     }
