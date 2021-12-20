@@ -208,7 +208,7 @@ async function notifyUser(req, res) {
         const message = {
           token: userTo.fcmtoken,
           notification: {
-            title: userFrom.name(),
+            title: userFrom.name() + " -> " + userTo.name(),
             body: req.body.message,
           },
           data: {
