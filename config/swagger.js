@@ -307,7 +307,7 @@ module.exports = {
         },
       },
     },
-    "/user": {
+    "/users": {
       get: {
         tags: ["admin", "user"],
         summary: "User list",
@@ -399,6 +399,332 @@ module.exports = {
         },
       },
     },
+    "/users/blocked": {
+      get: {
+        tags: ["admin"],
+        summary: "User blocked",
+        description: "Check if a user is blocked. Email user is obtained from request headers",
+        parameters: [
+        ],
+        responses: {
+          200: {
+            description: "Return a boolean that indicates if the user is blocked",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    blocked: {
+                      type: "bool",
+                      example: "false"
+                    }
+                  }
+                },
+              },
+            },
+          },
+          404: {
+            description: "The user does not exist",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorNotFound",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        },
+      }
+    },
+    "/users/:id":{
+      patch: {
+        tags: ["user"],
+        summary: "Update a user",
+        description: "Receives the specific user's attributes to be updated",
+        parameters: [
+          {
+            in: "path",
+            description: "User id",
+            type: "string",
+            required: true,
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestPatchUser",
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          204: {
+            description: "Nothing to return",
+          },
+          400: {
+            description: "Invalid user id format",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorInvalidIdFormat",
+                },
+              },
+            },
+          },
+          404: {
+            description: "The user does not exist",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorNotFound",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        }
+      },
+      get: {
+        tags: ["user"],
+        summary: "Get user",
+        description: "Get user given a user id",
+        parameters: [
+          {
+            in: "path",
+            description: "User id",
+            type: "string",
+            required: true,
+          },
+        ],
+        responses:{
+          200: {
+            description: "Requested user",
+            content:{
+              "application/json":{
+                schema: {
+                  $ref: "#/components/schemas/User",
+                }
+              }
+            }
+          },
+          400: {
+            description: "Invalid user id format",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorInvalidIdFormat",
+                },
+              },
+            },
+          },
+          404: {
+            description: "The user does not exist",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorNotFound",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        }
+      }
+    },
+    "/users/:id/block":{
+      post: {
+        tags: ["admin"],
+        summary: "Block a user",
+        description: "Receives user id to be blocked",
+        parameters: [
+          {
+            in: "path",
+            description: "User id",
+            type: "string",
+            required: true,
+          },
+        ],
+        responses: {
+          204: {
+            description: "Nothing to return",
+          },
+          400: {
+            description: "Invalid user id format or user is already blocked",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorInvalidIdFormat",
+                },
+              },
+            },
+          },
+          404: {
+            description: "The user does not exist",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorNotFound",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        }
+      },
+      delete: {
+        tags: ["admin"],
+        summary: "Unblock a user",
+        description: "Receives user id to be unblocked",
+        parameters: [
+          {
+            in: "path",
+            description: "User id",
+            type: "string",
+            required: true,
+          },
+        ],
+        responses:{
+          204: {
+            description: "Nothing to return",
+          },
+          400: {
+            description: "Invalid user id format or user is already unblocked",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorInvalidIdFormat",
+                },
+              },
+            },
+          },
+          404: {
+            description: "The user does not exist",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorNotFound",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        }
+      }
+    },
+    "/users/notify": {
+      post: {
+        tags: ["user"],
+        summary: "Send push notification",
+        description: "Send a push notification with message to a user",
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/RequestNotify",
+              },
+            },
+          },
+          required: true,
+        },
+        responses: {
+          200: {
+            description: "Return a boolean that indicates if the message was sent",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    messageSent: {
+                      type: "bool",
+                      example: "true"
+                    }
+                  }
+                },
+              },
+            },
+          },
+          400: {
+            description: "Invalid user id format or the message is empty",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorInvalidIdFormat",
+                },
+              },
+            },
+          },
+          404: {
+            description: "The user does not exist",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorNotFound",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Error: Internal Server Error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/Error",
+                },
+              },
+            },
+          },
+        }
+      }
+    }
+
   },
   components: {
     schemas: {
@@ -438,6 +764,63 @@ module.exports = {
             required: true,
           },
         },
+      },
+      RequestPatchUser: {
+        type: "object",
+        description: "At least one attribute must be present in the body",
+        properties: {
+          password: {
+            type: "string",
+            description: "Your password",
+            example: "Passw0rd1234",
+            minlength: 8,
+          },
+          firstName: {
+            type: "string",
+            example: "Pablo",
+          },
+          lastName: {
+            type: "string",
+            example: "Massuh",
+          },
+          email: {
+            type: "string",
+            example: "pablomassuh@hotmail.com",
+            required: true,
+          },
+          placeId: {
+            type: "string",
+            description: "It's the id of the user's city",
+            example: "ChIJWcbC2mUso5URjTfoNV12W7k",
+          },
+          interests: {
+            type: "array",
+            description: "It's an array of string of the user's interests",
+            example: "['COOKING', 'YOGA']",
+          },
+          fcmtoken: {
+            type: "string",
+            description: "It's the firebase token to be used in push notifications ",
+            example: "faskjfladsfjkljk4k43kjvjasgjlktgjkljkl56jkdk33l2",
+          }
+        }
+      },
+      RequestNotify: {
+        type: "object",
+        properties: {
+          to: {
+            type: "string",
+            example: "6161da733dbb2500114bc6cf",
+          },
+          from: {
+            type: "string",
+            example: "61649b014eae860011ceb0db",
+          },
+          message: {
+            type: "string",
+            example: "Message example!"
+          }
+        }
       },
       RequestRegister: {
         type: "object",
@@ -509,7 +892,7 @@ module.exports = {
           },
         },
       },
-      //Response: 400,500..
+      //Response: 400, 404, 500..
       ErrorAuthentication: {
         type: "object",
         properties: {
@@ -530,6 +913,16 @@ module.exports = {
           },
         },
       },
+      ErrorInvalidIdFormat: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            description: "The given id has a not valid format",
+            example: "Invalid user id format.",
+          },
+        },
+      },
       Error: {
         type: "object",
         properties: {
@@ -537,6 +930,16 @@ module.exports = {
             type: "string",
             description: "the cause of the error",
             example: "There was an error with login.",
+          },
+        },
+      },
+      ErrorNotFound: {
+        type: "object",
+        properties: {
+          message: {
+            type: "string",
+            description: "the cause of the error",
+            example: "User not found",
           },
         },
       },
