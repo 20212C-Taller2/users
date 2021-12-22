@@ -92,7 +92,14 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-connectionDB.connect().then(r => console.log(r)).catch(e => console.error(e));
+console.log("BEFORE CALLING connectionDB.connect()")
+connectionDB.connect().then(r => {
+  console.log("Inside then connectionDB.connect()")
+  console.log(r)
+}).catch(e => {
+  console.log("Inside Catch connectionDB.connect()")
+  console.error(e)
+});
 const secret = JSON.parse(config.FIREBASE_SECRET);
 admin.initializeApp({
   credential: admin.credential.cert(secret),

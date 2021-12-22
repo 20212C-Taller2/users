@@ -21,6 +21,7 @@ const MockQueue = require("./../mocks/MockQueue");
 
 const serviceMetricsWithMockQueue = proxyquire("../../services/metricsService", {
   amqplib: MockQueue,
+    "./../services/log/logService": mockLogger,
 });
 
 const registerWithMockedMetricsService = proxyquire("../../routes/register", {

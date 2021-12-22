@@ -19,6 +19,7 @@ const mockDatabase = proxyquire("../model/databaseTestHelper", {
 
 const serviceMetricsWithMockQueue = proxyquire("../../services/metricsService", {
   amqplib: MockQueue,
+  "./../services/log/logService": mockLogger,
 });
 
 const loginWithMockedMetricsService = proxyquire("../../routes/login", {

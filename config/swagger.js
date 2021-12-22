@@ -404,8 +404,7 @@ module.exports = {
         tags: ["admin"],
         summary: "User blocked",
         description: "Check if a user is blocked. Email user is obtained from request headers",
-        parameters: [
-        ],
+        parameters: [],
         responses: {
           200: {
             description: "Return a boolean that indicates if the user is blocked",
@@ -416,9 +415,9 @@ module.exports = {
                   properties: {
                     blocked: {
                       type: "bool",
-                      example: "false"
-                    }
-                  }
+                      example: "false",
+                    },
+                  },
                 },
               },
             },
@@ -444,9 +443,9 @@ module.exports = {
             },
           },
         },
-      }
+      },
     },
-    "/users/:id":{
+    "/users/:id": {
       patch: {
         tags: ["user"],
         summary: "Update a user",
@@ -503,7 +502,7 @@ module.exports = {
               },
             },
           },
-        }
+        },
       },
       get: {
         tags: ["user"],
@@ -517,16 +516,16 @@ module.exports = {
             required: true,
           },
         ],
-        responses:{
+        responses: {
           200: {
             description: "Requested user",
-            content:{
-              "application/json":{
+            content: {
+              "application/json": {
                 schema: {
                   $ref: "#/components/schemas/User",
-                }
-              }
-            }
+                },
+              },
+            },
           },
           400: {
             description: "Invalid user id format",
@@ -558,10 +557,10 @@ module.exports = {
               },
             },
           },
-        }
-      }
+        },
+      },
     },
-    "/users/:id/block":{
+    "/users/:id/block": {
       post: {
         tags: ["admin"],
         summary: "Block a user",
@@ -608,7 +607,7 @@ module.exports = {
               },
             },
           },
-        }
+        },
       },
       delete: {
         tags: ["admin"],
@@ -622,7 +621,7 @@ module.exports = {
             required: true,
           },
         ],
-        responses:{
+        responses: {
           204: {
             description: "Nothing to return",
           },
@@ -656,8 +655,8 @@ module.exports = {
               },
             },
           },
-        }
-      }
+        },
+      },
     },
     "/users/notify": {
       post: {
@@ -684,9 +683,9 @@ module.exports = {
                   properties: {
                     messageSent: {
                       type: "bool",
-                      example: "true"
-                    }
-                  }
+                      example: "true",
+                    },
+                  },
                 },
               },
             },
@@ -721,10 +720,9 @@ module.exports = {
               },
             },
           },
-        }
-      }
-    }
-
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -752,7 +750,7 @@ module.exports = {
         items: {
           type: "string",
         },
-        example: ["618b0a115174460011e7898c", "61649b014eae860011ceb0db"]
+        example: ["618b0a115174460011e7898c", "61649b014eae860011ceb0db"],
       },
       RequestGoogleLogin: {
         type: "object",
@@ -802,8 +800,8 @@ module.exports = {
             type: "string",
             description: "It's the firebase token to be used in push notifications ",
             example: "faskjfladsfjkljk4k43kjvjasgjlktgjkljkl56jkdk33l2",
-          }
-        }
+          },
+        },
       },
       RequestNotify: {
         type: "object",
@@ -818,9 +816,9 @@ module.exports = {
           },
           message: {
             type: "string",
-            example: "Message example!"
-          }
-        }
+            example: "Message example!",
+          },
+        },
       },
       RequestRegister: {
         type: "object",
